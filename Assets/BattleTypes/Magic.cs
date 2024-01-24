@@ -23,8 +23,14 @@ public abstract class Magic : Hero
 
     public override void Step(List<Hero> mates, List<Hero> enemies)
     {
-        if (IsDead || Mane <= 0)
+        if (IsDead)
             return;
+
+        if (Mane <= 0)
+        {
+            Mane += 10;
+            return;
+        }
 
         var info = GetNearestEnemy(Position, enemies);
 

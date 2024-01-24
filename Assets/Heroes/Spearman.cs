@@ -8,7 +8,7 @@ public class Spearman : Distant
 
     public override int Ammo
     {
-        get => _health;
+        get => _ammo;
         set
         {
             if (value < 0)
@@ -21,5 +21,6 @@ public class Spearman : Distant
     public Spearman(string name, (int X, int Y) position) : base(name, position)
     {
         Range = 2;
+        HeroType = HeroType.Spearman;
     }
 }

@@ -12,19 +12,7 @@ public abstract class Hero(string name, (int X, int Y) position) : IHero
 
     public bool IsDead { get; protected set; } = false;
 
-    protected int _health = 100;
-
-    public int Health
-    {
-        get => _health;
-        set
-        {
-            if (value < 0)
-                _health = 0;
-            else if (value > 100)
-                _health = 100;
-        }
-    }
+    public int Health { get; set; } = 100;
 
     public int Priority { get; protected set; }
 
@@ -36,13 +24,13 @@ public abstract class Hero(string name, (int X, int Y) position) : IHero
 
         protected set
         {
-            if (value.X < 0)
-                value.X = 0;
+            if (value.X < 1)
+                value.X = 1;
             else if (value.X > 10)
                 value.X = 10;
 
-            if (value.Y < 0)
-                value.Y = 0;
+            if (value.Y < 1)
+                value.Y = 1;
             else if (value.Y > 10)
                 value.Y = 10;
 
@@ -55,9 +43,17 @@ public abstract class Hero(string name, (int X, int Y) position) : IHero
     public void ChangeHealth(int points, bool isHealing = false)
     {
         if (isHealing)
+        {
             Health += points;
+            if (Health > 100)
+                Health = 100;
+        }
         else
+        {
             Health -= points;
+            if (Health < 0)
+                Health = 0;
+        }
 
         if (Health <= 0)
             IsDead = true;
@@ -65,37 +61,54 @@ public abstract class Hero(string name, (int X, int Y) position) : IHero
 
     public virtual void Step(List<Hero> mates, List<Hero> enemies)
     {
+        (int X, int Y) position;
+
         var info = GetNearestEnemy(Position, enemies);
 
-        if (info.Distance < Range)
+        if (Position.X < info.Enemy.Position.X)
+        {
+            position = (Position.X + 1, Position.Y);
+            if (!mates.Any(mate => mate.Position == position && mate.IsDead == false))
+                Position = position;
             return;
-
-        (int X, int Y) distance = ((Position.X - info.Enemy.Position.X), (Position.Y - info.Enemy.Position.Y));
-
-        if (distance.X > distance.Y)
-        {
-            (int X, int Y) newPosition = (MovePosition(distance.X), distance.Y);
-            if (mates.Any(mate => mate.Position == newPosition))
-                return;
         }
-        else
+        if (Position.X > info.Enemy.Position.X)
         {
-            (int X, int Y) newPosition = (distance.X, MovePosition(distance.Y));
-            if (mates.Any(mate => mate.Position == newPosition))
-                return;
+            position = (Position.X - 1, Position.Y);
+            if (!mates.Any(mate => mate.Position == position && mate.IsDead == false))
+                Position = position;
+            return;
+        }
+        if (Position.Y < info.Enemy.Position.Y)
+        {
+            position = (Position.X, Position.Y - 1);
+            if (!mates.Any(mate => mate.Position == position && mate.IsDead == false))
+                Position = position;
+            return;
+        }
+        if (Position.Y > info.Enemy.Position.Y)
+        {
+            position = (Position.X, Position.Y - 1);
+            if (!mates.Any(mate => mate.Position == position && mate.IsDead == false))
+                Position = position;
+            return;
         }
     }
 
-    protected int MovePosition(int direction)
+    protected static bool IsPositionOccupied(List<Hero> mates, (int X, int Y) position)
     {
-        if (direction < 0)
-            return direction + 1;
-        else
-            return direction - 1;
+        return mates.Any(mate => mate.Position == position);
+    }
+
+    protected static (int X, int Y) GetPositionDifference((int X, int Y) selfPosition, (int X, int Y) enemyPosition)
+    {
+        return (selfPosition.X - enemyPosition.X, selfPosition.Y - enemyPosition.Y);
     }
 
     protected static (float Distance, Hero Enemy) GetNearestEnemy((int X, int Y) selfPosition, List<Hero> enemies)
     {
+        enemies = enemies.Where(enemy => enemy.IsDead == false).ToList();
+
         float distance = enemies.Min(enemy => GetDistance(selfPosition, enemy.Position));
         Hero enemy = enemies.First(enemy => GetDistance(selfPosition, enemy.Position) == distance);
 

@@ -11,7 +11,10 @@ public class Villager : Bearer
 
     public override void Step(List<Hero> mates, List<Hero> enemies)
     {
-        foreach (var hero in mates.Where(mate => mate.BattleType == BattleType.Distant))
+        if (IsDead)
+            return;
+
+        foreach (var hero in mates.Where(mate => mate.BattleType == BattleType.Distant && mate.IsDead == false))
         {
             ((Distant)hero).Ammo += 1;
         }
