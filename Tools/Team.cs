@@ -22,19 +22,38 @@ public class Team
         return Heroes.OrderBy(hero => hero.Priority).ToList();
     }
 
-    public bool IsAnyALive()
+    public bool CanFight()
     {
-        return Heroes.Any(hero => hero.IsDead == false);
+        bool canFight = true;
+
+        canFight = Heroes.Any(hero => hero.BattleType == Assets.BattleTypes.BattleType.Melee && hero.IsDead == false);
+        canFight = Heroes.Any(hero => hero.BattleType == Assets.BattleTypes.BattleType.Bearer && hero.IsDead == false);
+        return canFight;
     }
 
     private void GenerateTeam()
     {
+        Heroes.Add(CreateHero(1,
+                _names[_random.Next(1, _names.Count - 1)],
+                ((Side == TeamSide.Darkness ? 1 : 10), 3)));
+        Heroes.Add(CreateHero(1,
+                _names[_random.Next(1, _names.Count - 1)],
+                ((Side == TeamSide.Darkness ? 1 : 10), 8)));
+
         for (int i = 1; i <= 10; i++)
         {
-            Heroes.Add(CreateHero(_random.Next(1, 8), 
+            if (i == 3 || i == 8)
+                continue;
+
+            Heroes.Add(CreateHero(_random.Next(2, 8), 
                 _names[_random.Next(1, _names.Count - 1)],
                 ((Side == TeamSide.Darkness ? 1 : 10), i)));
         }
+    }
+
+    public bool Contains(Hero hero)
+    {
+        return Heroes.Contains(hero);
     }
 
     private static Hero CreateHero(int number, string name, (int X, int Y) position)

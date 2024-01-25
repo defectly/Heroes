@@ -1,5 +1,6 @@
 ﻿using Assets.BattleTypes;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace Assets;
 
@@ -38,7 +39,7 @@ public abstract class Hero(string name, (int X, int Y) position) : IHero
         }
     }
 
-    public int damage { get; protected set; } = 10;
+    public int Damage { get; protected set; } = 10;
 
     public void ChangeHealth(int points, bool isHealing = false)
     {
@@ -61,43 +62,65 @@ public abstract class Hero(string name, (int X, int Y) position) : IHero
 
     public virtual void Step(List<Hero> mates, List<Hero> enemies)
     {
-        (int X, int Y) position;
-
         var info = GetNearestEnemy(Position, enemies);
 
-        if (Position.X < info.Enemy.Position.X)
+        var nextPosition = NextPosition(Position, info.Enemy.Position);
+
+        if (!mates.Any(mate => mate.Position == nextPosition && mate.IsDead == false))
+            Position = nextPosition;
+    }
+
+    protected (int X, int Y) NextPosition((int X, int Y) selfPosition, (int X, int Y) enemyPosition)
+    {
+        var difference = GetPositionDifference(selfPosition, enemyPosition);
+        var nextPosition = Position;
+
+        if (difference.X < 0)
+            nextPosition = (nextPosition.X + 1, nextPosition.Y);
+        else if(difference.X > 0)
+            nextPosition = (nextPosition.X - 1, nextPosition.Y);
+        else if(difference.Y < 0)
+            nextPosition = (nextPosition.X, nextPosition.Y + 1);
+        else if(difference.Y > 0)
+            nextPosition = (nextPosition.X, nextPosition.Y - 1);
+
+        return nextPosition;
+    }
+
+    protected (int X, int Y) Move((int X, int Y) selfPosition, double degree)
+    {
+        (int X, int Y) position;
+
+        if (degree <= 45 && degree > 315)
+            position = (selfPosition.X + 1, selfPosition.Y);
+        else if (degree <= 135 && degree > 45)
+            position = (selfPosition.X, selfPosition.Y + 1);
+        else if (degree <= 225 && degree > 135)
+            position = (selfPosition.X - 1, selfPosition.Y);
+        else
+            position = (selfPosition.X, selfPosition.Y - 1);
+
+        return position;
+    }
+
+    protected static double FixAngle(double angle)
+    {
+        var newAngle = angle;
+
+        if (angle < 0)
         {
-            position = (Position.X + 1, Position.Y);
-            if (!mates.Any(mate => mate.Position == position && mate.IsDead == false))
-                Position = position;
-            return;
+            newAngle = angle + (2 * Math.PI);
         }
-        if (Position.X > info.Enemy.Position.X)
+        if (angle > Math.PI)
         {
-            position = (Position.X - 1, Position.Y);
-            if (!mates.Any(mate => mate.Position == position && mate.IsDead == false))
-                Position = position;
-            return;
+            newAngle = 2 * Math.PI - angle;
         }
-        if (Position.Y < info.Enemy.Position.Y)
-        {
-            position = (Position.X, Position.Y - 1);
-            if (!mates.Any(mate => mate.Position == position && mate.IsDead == false))
-                Position = position;
-            return;
-        }
-        if (Position.Y > info.Enemy.Position.Y)
-        {
-            position = (Position.X, Position.Y - 1);
-            if (!mates.Any(mate => mate.Position == position && mate.IsDead == false))
-                Position = position;
-            return;
-        }
+        return newAngle;
     }
 
     protected static bool IsPositionOccupied(List<Hero> mates, (int X, int Y) position)
     {
-        return mates.Any(mate => mate.Position == position);
+        return mates.Any(mate => mate.Position == position && mate.IsDead == false);
     }
 
     protected static (int X, int Y) GetPositionDifference((int X, int Y) selfPosition, (int X, int Y) enemyPosition)
@@ -122,7 +145,7 @@ public abstract class Hero(string name, (int X, int Y) position) : IHero
 
     protected virtual void Attack(Hero enemy)
     {
-        enemy.ChangeHealth(damage);
+        enemy.ChangeHealth(Damage);
     }
 
     public override string ToString()

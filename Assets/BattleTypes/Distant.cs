@@ -2,7 +2,7 @@
 
 public abstract class Distant : Hero
 {
-    public virtual int Ammo { get; set; }
+    public virtual int Ammo { get; set; } = 5;
 
     public Distant(string name, (int X, int Y) position) : base(name, position)
     {

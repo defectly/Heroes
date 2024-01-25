@@ -2,18 +2,7 @@
 
 public abstract class Magic : Hero
 {
-    protected int _mane = 100;
-    public int Mane
-    {
-        get => _mane;
-        set
-        {
-            if (value < 0)
-                _mane = 0;
-            else if (value > 100)
-                _mane = 100;
-        }
-    }
+    public int Mane { get; set; } = 100;
 
     public Magic(string name, (int X, int Y) position) : base(name, position)
     {
@@ -46,6 +35,6 @@ public abstract class Magic : Hero
     protected override void Attack(Hero enemy)
     {
         base.Attack(enemy);
-        Mane -= damage;
+        Mane -= Damage;
     }
 }
