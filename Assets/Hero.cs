@@ -87,42 +87,6 @@ public abstract class Hero(string name, (int X, int Y) position) : IHero
         return nextPosition;
     }
 
-    protected (int X, int Y) Move((int X, int Y) selfPosition, double degree)
-    {
-        (int X, int Y) position;
-
-        if (degree <= 45 && degree > 315)
-            position = (selfPosition.X + 1, selfPosition.Y);
-        else if (degree <= 135 && degree > 45)
-            position = (selfPosition.X, selfPosition.Y + 1);
-        else if (degree <= 225 && degree > 135)
-            position = (selfPosition.X - 1, selfPosition.Y);
-        else
-            position = (selfPosition.X, selfPosition.Y - 1);
-
-        return position;
-    }
-
-    protected static double FixAngle(double angle)
-    {
-        var newAngle = angle;
-
-        if (angle < 0)
-        {
-            newAngle = angle + (2 * Math.PI);
-        }
-        if (angle > Math.PI)
-        {
-            newAngle = 2 * Math.PI - angle;
-        }
-        return newAngle;
-    }
-
-    protected static bool IsPositionOccupied(List<Hero> mates, (int X, int Y) position)
-    {
-        return mates.Any(mate => mate.Position == position && mate.IsDead == false);
-    }
-
     protected static (int X, int Y) GetPositionDifference((int X, int Y) selfPosition, (int X, int Y) enemyPosition)
     {
         return (selfPosition.X - enemyPosition.X, selfPosition.Y - enemyPosition.Y);
